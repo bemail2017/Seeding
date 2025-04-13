@@ -1,0 +1,105 @@
+:root {
+    --window-bg: #c0c0c0;
+    --border-light: #ffffff;
+    --border-dark: #808080;
+    --title-bar-bg: #000080;
+    --text-color: #000000;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'MS Sans Serif', 'Segoe UI', Tahoma, sans-serif;
+}
+
+body {
+    background-color: #008080;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.retro-header {
+    background-color: var(--window-bg);
+    border: 2px solid var(--border-dark);
+    border-top-color: var(--border-light);
+    border-left-color: var(--border-light);
+    margin-bottom: 4px;
+}
+
+.title-bar {
+    background-color: var(--title-bar-bg);
+    color: white;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.title-buttons {
+    display: flex;
+    gap: 4px;
+    margin-right: 10px;
+}
+
+.button {
+    width: 12px;
+    height: 12px;
+    background-color: var(--window-bg);
+    border: 1px solid var(--border-dark);
+    display: inline-block;
+}
+
+.menu-bar {
+    background-color: var(--window-bg);
+    padding: 4px;
+    border: 2px solid var(--border-dark);
+    border-top-color: var(--border-light);
+    border-left-color: var(--border-light);
+    margin-bottom: 10px;
+}
+
+.menu-item {
+    background-color: var(--window-bg);
+    border: none;
+    padding: 2px 8px;
+    margin-right: 4px;
+    cursor: pointer;
+}
+
+.menu-item:hover {
+    background-color: var(--title-bar-bg);
+    color: white;
+}
+
+.window {
+    background-color: var(--window-bg);
+    border: 2px solid var(--border-dark);
+    border-top-color: var(--border-light);
+    border-left-color: var(--border-light);
+}
+
+.window-header {
+    background-color: var(--title-bar-bg);
+    color: white;
+    padding: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.window-close {
+    background-color: var(--window-bg);
+    border: 1px solid var(--border-dark);
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.window-content {
+    padding: 16px;
+    min-height: 200px;
+} 
