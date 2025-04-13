@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Retro Project</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
 </head>
 <body>
     <div class="container">
@@ -16,25 +17,203 @@
                     <span class="button"></span>
                 </div>
                 <h1>Project.exe</h1>
+                <div class="wallet-info">
+                    <button id="connectWallet" class="retro-button">Connect Wallet</button>
+                    <span id="walletAddress" class="wallet-address"></span>
+                </div>
             </div>
         </header>
         <nav class="menu-bar">
-            <button class="menu-item">File</button>
-            <button class="menu-item">Edit</button>
-            <button class="menu-item">View</button>
-            <button class="menu-item">Help</button>
+            <div class="menu-item" onclick="toggleSubmenu('home-menu')">
+                Home
+                <div id="home-menu" class="submenu">
+                    <div class="submenu-item" onclick="showContent('dashboard')">Dashboard</div>
+                    <div class="submenu-item" onclick="showContent('profile')">Profile</div>
+                    <div class="submenu-item" onclick="showContent('settings')">Settings</div>
+                </div>
+            </div>
+            <div class="menu-item" onclick="toggleSubmenu('game-menu')">
+                Game
+                <div id="game-menu" class="submenu">
+                    <div class="submenu-item" onclick="showContent('arcade')">Arcade Games</div>
+                    <div class="submenu-item" onclick="showContent('action')">Action Games</div>
+                    <div class="submenu-item" onclick="showContent('puzzle')">Puzzle Games</div>
+                    <div class="submenu-separator"></div>
+                    <div class="submenu-item" onclick="showContent('leaderboard')">Leaderboard</div>
+                </div>
+            </div>
+            <div class="menu-item" onclick="toggleSubmenu('airdrop-menu')">
+                Airdrop
+                <div id="airdrop-menu" class="submenu">
+                    <div class="submenu-item" onclick="showContent('active')">Active Airdrops</div>
+                    <div class="submenu-item" onclick="showContent('upcoming')">Upcoming</div>
+                    <div class="submenu-item" onclick="showContent('ended')">Ended</div>
+                    <div class="submenu-separator"></div>
+                    <div class="submenu-item" onclick="showContent('my-airdrops')">My Airdrops</div>
+                </div>
+            </div>
+            <div class="menu-item" onclick="toggleSubmenu('contact-menu')">
+                Contact
+                <div id="contact-menu" class="submenu">
+                    <div class="submenu-item" onclick="showContent('message')">Send Message</div>
+                    <div class="submenu-item" onclick="showContent('email')">Email Us</div>
+                    <div class="submenu-separator"></div>
+                    <div class="submenu-item" onclick="showContent('social')">Social Media</div>
+                </div>
+            </div>
+            <div class="menu-item" onclick="toggleSubmenu('help-menu')">
+                Help
+                <div id="help-menu" class="submenu">
+                    <div class="submenu-item" onclick="showContent('faq')">FAQ</div>
+                    <div class="submenu-item" onclick="showContent('guide')">User Guide</div>
+                    <div class="submenu-item" onclick="showContent('support')">Support</div>
+                    <div class="submenu-separator"></div>
+                    <div class="submenu-item" onclick="showContent('about')">About Us</div>
+                </div>
+            </div>
         </nav>
         <main class="content">
             <div class="window">
                 <div class="window-header">
-                    <span class="window-title">Welcome.txt</span>
+                    <span class="window-title" id="window-title">Welcome</span>
                     <button class="window-close">×</button>
                 </div>
                 <div class="window-content">
-                    <p>Welcome to my retro-style website!</p>
+                    <!-- Home sections -->
+                    <div id="dashboard" class="content-section">
+                        <h2>Dashboard</h2>
+                        <p>Welcome to your dashboard...</p>
+                    </div>
+                    
+                    <!-- Game sections -->
+                    <div id="arcade" class="content-section" style="display: none;">
+                        <h2>Arcade Games</h2>
+                        <p>Classic arcade games collection...</p>
+                    </div>
+                    
+                    <!-- Airdrop sections -->
+                    <div id="active" class="content-section" style="display: none;">
+                        <h2>Active Airdrops</h2>
+                        <p>Current active airdrop campaigns...</p>
+                    </div>
+                    
+                    <!-- Contact sections -->
+                    <div id="message" class="content-section" style="display: none;">
+                        <h2>Send Message</h2>
+                        <form class="retro-form">
+                            <div class="form-group">
+                                <label>Name:</label>
+                                <input type="text" class="retro-input">
+                            </div>
+                            <div class="form-group">
+                                <label>Message:</label>
+                                <textarea class="retro-textarea"></textarea>
+                            </div>
+                            <button class="retro-button">Send</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Help sections -->
+                    <div id="faq" class="content-section" style="display: none;">
+                        <h2>Frequently Asked Questions</h2>
+                        <p>Common questions and answers...</p>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
+
+    <script>
+        // Đóng tất cả submenu
+        function closeAllSubmenus() {
+            const submenus = document.getElementsByClassName('submenu');
+            for (let submenu of submenus) {
+                submenu.style.display = 'none';
+            }
+        }
+
+        // Toggle submenu
+        function toggleSubmenu(menuId) {
+            closeAllSubmenus();
+            const submenu = document.getElementById(menuId);
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
+            } else {
+                submenu.style.display = 'block';
+            }
+            event.stopPropagation();
+        }
+
+        // Hiển thị nội dung
+        function showContent(sectionId) {
+            const sections = document.getElementsByClassName('content-section');
+            for (let section of sections) {
+                section.style.display = 'none';
+            }
+            
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.style.display = 'block';
+                // Cập nhật tiêu đề cửa sổ
+                const title = section.querySelector('h2').textContent;
+                document.getElementById('window-title').textContent = title;
+            }
+            
+            closeAllSubmenus();
+            event.stopPropagation();
+        }
+
+        // Đóng submenu khi click ra ngoài
+        document.addEventListener('click', function() {
+            closeAllSubmenus();
+        });
+
+        // Metamask Integration
+        let userWalletAddress = null;
+        let provider = null;
+        let signer = null;
+
+        async function connectWallet() {
+            try {
+                // Kiểm tra xem MetaMask có được cài đặt không
+                if (typeof window.ethereum === 'undefined') {
+                    alert('Please install MetaMask first.');
+                    return;
+                }
+
+                // Yêu cầu quyền truy cập vào tài khoản
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                // Lưu địa chỉ ví
+                userWalletAddress = accounts[0];
+                
+                // Hiển thị địa chỉ ví đã rút gọn
+                document.getElementById('walletAddress').innerHTML = 
+                    userWalletAddress.substring(0, 6) + '...' + 
+                    userWalletAddress.substring(userWalletAddress.length - 4);
+
+                // Cập nhật button
+                document.getElementById('connectWallet').innerHTML = 'Connected';
+
+                // Khởi tạo provider và signer
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+
+                // Lắng nghe sự kiện thay đổi tài khoản
+                window.ethereum.on('accountsChanged', function (accounts) {
+                    window.location.reload();
+                });
+
+            } catch (error) {
+                console.error(error);
+                alert('Error connecting to MetaMask');
+            }
+        }
+
+        // Thêm event listener cho button
+        document.getElementById('connectWallet').addEventListener('click', connectWallet);
+    </script>
 </body>
 </html> 
