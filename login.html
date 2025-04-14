@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Project.exe</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="login-window window">
+            <div class="window-header">
+                <span>Login.exe</span>
+                <button class="window-close">×</button>
+            </div>
+            <div class="window-content">
+                <div class="login-tabs">
+                    <button class="tab-button active" onclick="switchTab('traditional')">Traditional Login</button>
+                    <button class="tab-button" onclick="switchTab('web3')">Web3 Login</button>
+                </div>
+                
+                <!-- Traditional Login Form -->
+                <div id="traditional-login" class="login-form">
+                    <form class="retro-form" onsubmit="return handleTraditionalLogin(event)">
+                        <div class="form-group">
+                            <label>Username:</label>
+                            <input type="text" class="retro-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password:</label>
+                            <input type="password" class="retro-input" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="retro-button">Login</button>
+                            <button type="button" class="retro-button" onclick="showRegister()">Register</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Web3 Login -->
+                <div id="web3-login" class="login-form" style="display: none;">
+                    <div class="web3-container">
+                        <img src="metamask-logo.png" alt="MetaMask" class="web3-logo">
+                        <button id="connectWallet" class="retro-button web3-button">Connect MetaMask</button>
+                        <p class="web3-status" id="walletStatus"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            // Ẩn tất cả form
+            document.querySelectorAll('.login-form').forEach(form => {
+                form.style.display = 'none';
+            });
+            // Hiển thị form được chọn
+            document.getElementById(tab + '-login').style.display = 'block';
+            
+            // Cập nhật trạng thái active của tabs
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        async function handleTraditionalLogin(event) {
+            event.preventDefault();
+            // TODO: Implement traditional login
+            alert('Traditional login will be implemented with backend');
+        }
+
+        function showRegister() {
+            window.location.href = 'register.html';
+        }
+
+        // Web3 Login
+        let userWalletAddress = null;
+        let provider = null;
+        let signer = null;
+
+        async function connectWallet() {
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    alert('Please install MetaMask first.');
+                    return;
+                }
+
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                userWalletAddress = accounts[0];
+                document.getElementById('walletStatus').innerHTML = 
+                    'Connected: ' + userWalletAddress.substring(0, 6) + '...' + 
+                    userWalletAddress.substring(userWalletAddress.length - 4);
+
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+
+                // TODO: Send to backend for authentication
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+
+            } catch (error) {
+                console.error(error);
+                alert('Error connecting to MetaMask');
+            }
+        }
+
+        document.getElementById('connectWallet').addEventListener('click', connectWallet);
+    </script>
+</body>
+</html> 

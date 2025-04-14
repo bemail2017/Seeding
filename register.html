@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Project.exe</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-window window">
+            <div class="window-header">
+                <span>Register.exe</span>
+                <button class="window-close" onclick="window.location.href='login.html'">×</button>
+            </div>
+            <div class="window-content">
+                <form class="retro-form" onsubmit="return handleRegister(event)">
+                    <div class="form-group">
+                        <label>Username:</label>
+                        <input type="text" name="username" class="retro-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" name="email" class="retro-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password:</label>
+                        <input type="password" name="password" class="retro-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password:</label>
+                        <input type="password" name="confirmPassword" class="retro-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="connectWallet">
+                            Connect Wallet after registration
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="retro-button" onclick="window.location.href='login.html'">Back to Login</button>
+                        <button type="submit" class="retro-button">Register</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function handleRegister(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            // Validate password match
+            if (formData.get('password') !== formData.get('confirmPassword')) {
+                alert('Passwords do not match!');
+                return false;
+            }
+
+            // TODO: Send to backend
+            alert('Registration will be implemented with backend');
+            
+            // Check if user wants to connect wallet
+            if (formData.get('connectWallet')) {
+                // Redirect to login page with web3 tab active
+                window.location.href = 'login.html?tab=web3';
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html> 

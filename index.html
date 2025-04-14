@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Retro Project</title>
+    <title>Project.exe</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
 </head>
 <body>
     <div class="container">
@@ -17,37 +16,36 @@
                     <span class="button"></span>
                 </div>
                 <h1>Project.exe</h1>
-                <div class="wallet-info">
-                    <button id="connectWallet" class="retro-button">Connect Wallet</button>
-                    <span id="walletAddress" class="wallet-address"></span>
-                </div>
             </div>
         </header>
         <nav class="menu-bar">
-            <div class="menu-item" onclick="toggleSubmenu('home-menu')">
-                Home
-                <div id="home-menu" class="submenu">
-                    <div class="submenu-item" onclick="showContent('dashboard')">Dashboard</div>
-                    <div class="submenu-item" onclick="showContent('profile')">Profile</div>
-                    <div class="submenu-item" onclick="showContent('settings')">Settings</div>
-                </div>
-            </div>
-            <div class="menu-item" onclick="toggleSubmenu('game-menu')">
-                Game
-                <div id="game-menu" class="submenu">
-                    <div class="submenu-item" onclick="showContent('arcade')">Arcade Games</div>
-                    <div class="submenu-item" onclick="showContent('action')">Action Games</div>
-                    <div class="submenu-item" onclick="showContent('puzzle')">Puzzle Games</div>
+            <div class="menu-item" onclick="showContent('home')">Home</div>
+            <div class="menu-item" onclick="toggleSubmenu('gamefi-menu')">
+                GameFi
+                <div id="gamefi-menu" class="submenu">
+                    <div class="submenu-item" onclick="showContent('play2earn')">Play To Earn</div>
+                    <div class="submenu-item" onclick="showContent('nft-games')">NFT Games</div>
+                    <div class="submenu-item" onclick="showContent('defi-games')">DeFi Games</div>
                     <div class="submenu-separator"></div>
                     <div class="submenu-item" onclick="showContent('leaderboard')">Leaderboard</div>
+                </div>
+            </div>
+            <div class="menu-item" onclick="toggleSubmenu('tool-menu')">
+                Tool Auto
+                <div id="tool-menu" class="submenu">
+                    <div class="submenu-item" onclick="showContent('auto-claim')">Auto Claim</div>
+                    <div class="submenu-item" onclick="showContent('auto-mint')">Auto Mint NFT</div>
+                    <div class="submenu-item" onclick="showContent('auto-trade')">Auto Trade</div>
+                    <div class="submenu-separator"></div>
+                    <div class="submenu-item" onclick="showContent('bot-settings')">Bot Settings</div>
                 </div>
             </div>
             <div class="menu-item" onclick="toggleSubmenu('airdrop-menu')">
                 Airdrop
                 <div id="airdrop-menu" class="submenu">
-                    <div class="submenu-item" onclick="showContent('active')">Active Airdrops</div>
-                    <div class="submenu-item" onclick="showContent('upcoming')">Upcoming</div>
-                    <div class="submenu-item" onclick="showContent('ended')">Ended</div>
+                    <div class="submenu-item" onclick="showAirdropContent('active')">Active Airdrops</div>
+                    <div class="submenu-item" onclick="showAirdropContent('upcoming')">Upcoming</div>
+                    <div class="submenu-item" onclick="showAirdropContent('ended')">Ended</div>
                     <div class="submenu-separator"></div>
                     <div class="submenu-item" onclick="showContent('my-airdrops')">My Airdrops</div>
                 </div>
@@ -73,50 +71,138 @@
             </div>
         </nav>
         <main class="content">
-            <div class="window">
-                <div class="window-header">
-                    <span class="window-title" id="window-title">Welcome</span>
-                    <button class="window-close">×</button>
+            <!-- Home section -->
+            <div id="home" class="content-section">
+                <div class="window">
+                    <div class="window-header">
+                        <span>Trang chủ</span>
+                        <button class="window-close">✕</button>
+                    </div>
+                    <div class="window-content">
+                        <h2>Chào mừng đến với Project.exe</h2>
+                        <p>Đây là trang tổng quan về các tính năng của hệ thống.</p>
+                    </div>
                 </div>
-                <div class="window-content">
-                    <!-- Home sections -->
-                    <div id="dashboard" class="content-section">
-                        <h2>Dashboard</h2>
-                        <p>Welcome to your dashboard...</p>
+            </div>
+
+            <!-- GameFi section -->
+            <div id="play2earn" class="content-section" style="display: none;">
+                <div class="window">
+                    <div class="window-header">
+                        <span>Play To Earn Games</span>
+                        <button class="window-close">✕</button>
                     </div>
-                    
-                    <!-- Game sections -->
-                    <div id="arcade" class="content-section" style="display: none;">
-                        <h2>Arcade Games</h2>
-                        <p>Classic arcade games collection...</p>
+                    <div class="window-content">
+                        <h2>Danh sách game P2E</h2>
+                        <div class="game-list">
+                            <!-- Game list will be added here -->
+                        </div>
                     </div>
-                    
-                    <!-- Airdrop sections -->
-                    <div id="active" class="content-section" style="display: none;">
-                        <h2>Active Airdrops</h2>
-                        <p>Current active airdrop campaigns...</p>
+                </div>
+            </div>
+
+            <!-- Tool Auto section -->
+            <div id="auto-claim" class="content-section" style="display: none;">
+                <div class="window">
+                    <div class="window-header">
+                        <span>Auto Claim Tool</span>
+                        <button class="window-close">✕</button>
                     </div>
-                    
-                    <!-- Contact sections -->
-                    <div id="message" class="content-section" style="display: none;">
-                        <h2>Send Message</h2>
+                    <div class="window-content">
+                        <div class="tool-container">
+                            <div class="tool-settings">
+                                <h3>Cài đặt</h3>
+                                <form class="retro-form">
+                                    <div class="form-group">
+                                        <label>Network:</label>
+                                        <select class="retro-input">
+                                            <option>Ethereum</option>
+                                            <option>BSC</option>
+                                            <option>Polygon</option>
+                                        </select>
+                                    </div>
+                                    <button class="retro-button">Bắt đầu</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Airdrop section -->
+            <div id="airdrop-content" class="content-section" style="display: none;">
+                <div class="window">
+                    <div class="window-header">
+                        <span>Danh sách Airdrop</span>
+                        <button class="window-close">✕</button>
+                    </div>
+                    <div class="window-content">
+                        <div class="airdrop-toolbar">
+                            <div class="filter-group">
+                                <select id="statusFilter" class="retro-input">
+                                    <option value="all">Tất cả trạng thái</option>
+                                    <option value="active">Active</option>
+                                    <option value="upcoming">Upcoming</option>
+                                    <option value="ended">Ended</option>
+                                </select>
+                                <select id="sortBy" class="retro-input">
+                                    <option value="value">Sắp xếp theo giá trị</option>
+                                    <option value="date">Sắp xếp theo ngày</option>
+                                </select>
+                            </div>
+                            <div class="search-group">
+                                <input type="text" id="searchInput" class="retro-input" placeholder="Tìm kiếm...">
+                            </div>
+                        </div>
+                        <div id="airdrop-list" class="airdrop-grid"></div>
+                        <div class="pagination">
+                            <button class="retro-button" onclick="changePage(-1)">Trước</button>
+                            <span id="pageInfo">Trang 1</span>
+                            <button class="retro-button" onclick="changePage(1)">Sau</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact section -->
+            <div id="message" class="content-section" style="display: none;">
+                <div class="window">
+                    <div class="window-header">
+                        <span>Liên hệ</span>
+                        <button class="window-close">✕</button>
+                    </div>
+                    <div class="window-content">
                         <form class="retro-form">
                             <div class="form-group">
-                                <label>Name:</label>
+                                <label>Tên:</label>
                                 <input type="text" class="retro-input">
                             </div>
                             <div class="form-group">
-                                <label>Message:</label>
-                                <textarea class="retro-textarea"></textarea>
+                                <label>Email:</label>
+                                <input type="email" class="retro-input">
                             </div>
-                            <button class="retro-button">Send</button>
+                            <div class="form-group">
+                                <label>Nội dung:</label>
+                                <textarea class="retro-input"></textarea>
+                            </div>
+                            <button class="retro-button">Gửi</button>
                         </form>
                     </div>
-                    
-                    <!-- Help sections -->
-                    <div id="faq" class="content-section" style="display: none;">
-                        <h2>Frequently Asked Questions</h2>
-                        <p>Common questions and answers...</p>
+                </div>
+            </div>
+
+            <!-- Help section -->
+            <div id="faq" class="content-section" style="display: none;">
+                <div class="window">
+                    <div class="window-header">
+                        <span>Trợ giúp</span>
+                        <button class="window-close">✕</button>
+                    </div>
+                    <div class="window-content">
+                        <h2>Câu hỏi thường gặp</h2>
+                        <div class="faq-list">
+                            <!-- FAQ items will be added here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -154,9 +240,6 @@
             const section = document.getElementById(sectionId);
             if (section) {
                 section.style.display = 'block';
-                // Cập nhật tiêu đề cửa sổ
-                const title = section.querySelector('h2').textContent;
-                document.getElementById('window-title').textContent = title;
             }
             
             closeAllSubmenus();
@@ -168,52 +251,196 @@
             closeAllSubmenus();
         });
 
-        // Metamask Integration
-        let userWalletAddress = null;
-        let provider = null;
-        let signer = null;
+        // Show home content by default
+        showContent('home');
 
-        async function connectWallet() {
+        let allAirdrops = [];
+        let currentPage = 1;
+        const itemsPerPage = 12;
+
+        async function loadAirdrops() {
             try {
-                // Kiểm tra xem MetaMask có được cài đặt không
-                if (typeof window.ethereum === 'undefined') {
-                    alert('Please install MetaMask first.');
-                    return;
-                }
-
-                // Yêu cầu quyền truy cập vào tài khoản
-                const accounts = await window.ethereum.request({
-                    method: 'eth_requestAccounts'
-                });
-
-                // Lưu địa chỉ ví
-                userWalletAddress = accounts[0];
+                console.log('Đang tải dữ liệu từ Google Sheets...');
                 
-                // Hiển thị địa chỉ ví đã rút gọn
-                document.getElementById('walletAddress').innerHTML = 
-                    userWalletAddress.substring(0, 6) + '...' + 
-                    userWalletAddress.substring(userWalletAddress.length - 4);
-
-                // Cập nhật button
-                document.getElementById('connectWallet').innerHTML = 'Connected';
-
-                // Khởi tạo provider và signer
-                provider = new ethers.providers.Web3Provider(window.ethereum);
-                signer = provider.getSigner();
-
-                // Lắng nghe sự kiện thay đổi tài khoản
-                window.ethereum.on('accountsChanged', function (accounts) {
-                    window.location.reload();
+                // Thêm CORS proxy
+                const SHEET_ID = '15PsWPAhgBFiBqpnp0fjfJvyJjCcguPQOZiWKQRCyUg';
+                const base = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?`;
+                const query = encodeURIComponent('Select *');
+                const url = `${base}&tq=${query}`;
+                
+                const response = await fetch(url);
+                const text = await response.text();
+                const data = JSON.parse(text.substring(47).slice(0, -2));
+                
+                // Chuyển đổi dữ liệu
+                const headers = data.table.cols.map(col => col.label.toLowerCase());
+                allAirdrops = data.table.rows.map(row => {
+                    const project = {};
+                    headers.forEach((header, index) => {
+                        project[header] = row.c[index] ? row.c[index].v : '';
+                    });
+                    return project;
                 });
 
+                console.log('Dữ liệu đã tải:', allAirdrops);
+                filterAirdrops();
+                
             } catch (error) {
-                console.error(error);
-                alert('Error connecting to MetaMask');
+                console.error('Lỗi khi tải dữ liệu:', error);
+                document.getElementById('airdrop-list').innerHTML = `
+                    <div class="error-message">
+                        <p>Lỗi khi tải dữ liệu: ${error.message}</p>
+                        <p>Vui lòng thử lại sau</p>
+                        <button class="retro-button" onclick="loadAirdrops()">Thử lại</button>
+                    </div>`;
             }
         }
 
-        // Thêm event listener cho button
-        document.getElementById('connectWallet').addEventListener('click', connectWallet);
+        function filterAirdrops() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+
+            let filtered = [...allAirdrops];
+
+            // Lọc theo trạng thái
+            if (statusFilter !== 'all') {
+                filtered = filtered.filter(p => p.status.toLowerCase() === statusFilter);
+            }
+
+            // Lọc theo tìm kiếm
+            if (searchText) {
+                filtered = filtered.filter(p => 
+                    p.name.toLowerCase().includes(searchText) ||
+                    p.description.toLowerCase().includes(searchText)
+                );
+            }
+
+            // Sắp xếp
+            filtered.sort((a, b) => {
+                if (sortBy === 'value') {
+                    return parseFloat(b.value.replace('$', '')) - parseFloat(a.value.replace('$', ''));
+                } else {
+                    return new Date(b.enddate) - new Date(a.enddate);
+                }
+            });
+
+            // Phân trang
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            currentPage = Math.min(currentPage, totalPages);
+            currentPage = Math.max(1, currentPage);
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const paginatedItems = filtered.slice(start, start + itemsPerPage);
+
+            displayAirdrops(paginatedItems);
+            updatePagination(filtered.length);
+        }
+
+        function displayAirdrops(airdrops) {
+            const container = document.getElementById('airdrop-list');
+            container.innerHTML = '';
+
+            if (airdrops.length === 0) {
+                container.innerHTML = '<div class="no-results">Không tìm thấy dự án nào</div>';
+                return;
+            }
+
+            airdrops.forEach(project => {
+                const card = document.createElement('div');
+                card.className = 'airdrop-card';
+                card.innerHTML = `
+                    <div class="window-header">
+                        <span>${project.name}</span>
+                        <div class="project-status ${project.status.toLowerCase()}">
+                            <i>${project.status === 'Active' ? '▶' : project.status === 'Upcoming' ? '⏳' : '⏹'}</i>
+                            ${project.status}
+                        </div>
+                    </div>
+                    <div class="window-content">
+                        <div class="project-logo">
+                            <img src="${project.logo}" alt="${project.name}" onerror="this.src='default-logo.png'">
+                        </div>
+                        <div class="project-info">
+                            <div class="info-tag">
+                                <i>💰</i>
+                                <span class="project-value">${project.value}</span>
+                            </div>
+                            <div class="info-tag">
+                                <i>📅</i>
+                                <span class="project-date">${project.enddate}</span>
+                            </div>
+                            <div class="info-tag">
+                                <i>📋</i>
+                                <span class="project-requirements">${project.requirements}</span>
+                            </div>
+                        </div>
+                        <div class="project-desc">${project.description}</div>
+                        <a href="${project.link}" target="_blank" class="retro-button">Tham gia</a>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updatePagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            document.getElementById('pageInfo').textContent = 
+                `Trang ${currentPage} / ${totalPages}`;
+        }
+
+        function changePage(delta) {
+            currentPage += delta;
+            filterAirdrops();
+        }
+
+        // Thêm hàm để hiển thị loading
+        function showLoading() {
+            document.getElementById('airdrop-list').innerHTML = `
+                <div class="loading">
+                    <p>Đang tải dữ liệu...</p>
+                </div>`;
+        }
+
+        // Cập nhật event listener
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Trang đã load xong');
+            
+            // Thêm event listeners cho các controls
+            document.getElementById('statusFilter').addEventListener('change', filterAirdrops);
+            document.getElementById('sortBy').addEventListener('change', filterAirdrops);
+            document.getElementById('searchInput').addEventListener('input', filterAirdrops);
+            
+            // Hiển thị loading và load dữ liệu
+            showLoading();
+            loadAirdrops();
+        });
+
+        function showAirdropContent(status = 'all') {
+            console.log('Hiển thị airdrop với trạng thái:', status);
+            
+            // Hiển thị section airdrop
+            const sections = document.getElementsByClassName('content-section');
+            for (let section of sections) {
+                section.style.display = 'none';
+            }
+            
+            const airdropContent = document.getElementById('airdrop-content');
+            airdropContent.style.display = 'block';
+            
+            // Cập nhật filter
+            document.getElementById('statusFilter').value = status;
+            
+            // Load dữ liệu nếu chưa có
+            if (allAirdrops.length === 0) {
+                loadAirdrops();
+            } else {
+                filterAirdrops();
+            }
+            
+            // Đóng submenu
+            closeAllSubmenus();
+        }
     </script>
 </body>
 </html> 
