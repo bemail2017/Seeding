@@ -16,6 +16,7 @@
                     <span class="button"></span>
                 </div>
                 <h1>Project.exe</h1>
+                <button class="retro-button data-view-btn" onclick="showDataView()">Data View</button>
             </div>
         </header>
         <nav class="menu-bar">
@@ -138,6 +139,7 @@
                     </div>
                     <div class="window-content">
                         <div class="airdrop-toolbar">
+                            <button class="retro-button" onclick="showAddProjectForm()">+ Thêm dự án mới</button>
                             <div class="filter-group">
                                 <select id="statusFilter" class="retro-input">
                                     <option value="all">Tất cả trạng thái</option>
@@ -159,6 +161,60 @@
                             <button class="retro-button" onclick="changePage(-1)">Trước</button>
                             <span id="pageInfo">Trang 1</span>
                             <button class="retro-button" onclick="changePage(1)">Sau</button>
+                        </div>
+
+                        <!-- Form thêm dự án mới -->
+                        <div id="addProjectForm" class="modal" style="display: none;">
+                            <div class="modal-content window">
+                                <div class="window-header">
+                                    <span>Thêm dự án mới</span>
+                                    <button onclick="hideAddProjectForm()" class="window-close">✕</button>
+                                </div>
+                                <div class="window-content">
+                                    <form class="retro-form" onsubmit="addNewProject(event)">
+                                        <div class="form-group">
+                                            <label>Tên dự án:</label>
+                                            <input type="text" name="name" class="retro-input" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Logo URL:</label>
+                                            <input type="url" name="logo" class="retro-input" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Trạng thái:</label>
+                                            <select name="status" class="retro-input" required>
+                                                <option value="Active">Active</option>
+                                                <option value="Upcoming">Upcoming</option>
+                                                <option value="Ended">Ended</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Giá trị:</label>
+                                            <input type="text" name="value" class="retro-input" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Ngày kết thúc:</label>
+                                            <input type="date" name="enddate" class="retro-input" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Yêu cầu:</label>
+                                            <input type="text" name="requirements" class="retro-input" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Link dự án:</label>
+                                            <input type="url" name="link" class="retro-input" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Mô tả:</label>
+                                            <textarea name="description" class="retro-input" required></textarea>
+                                        </div>
+                                        <div class="form-actions">
+                                            <button type="submit" class="retro-button">Lưu</button>
+                                            <button type="button" class="retro-button" onclick="hideAddProjectForm()">Hủy</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -206,9 +262,49 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Thêm section Data View -->
+            <div id="data-view" class="content-section" style="display: none;">
+                <div class="window">
+                    <div class="window-header">
+                        <span>Data View - Google Sheet</span>
+                        <button class="window-close" onclick="hideDataView()">✕</button>
+                    </div>
+                    <div class="window-content">
+                        <div class="data-toolbar">
+                            <button class="retro-button" onclick="fetchSheetData()">Tải dữ liệu từ Sheet</button>
+                            <button class="retro-button" onclick="useDataForAirdrop()">Sử dụng cho Airdrop</button>
+                        </div>
+                        <div class="sheet-data">
+                            <table id="sheet-table" class="retro-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tên</th>
+                                        <th>Logo</th>
+                                        <th>Trạng thái</th>
+                                        <th>Giá trị</th>
+                                        <th>Ngày kết thúc</th>
+                                        <th>Yêu cầu</th>
+                                        <th>Link</th>
+                                        <th>Mô tả</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sheet-data">
+                                    <tr>
+                                        <td colspan="9">Chưa có dữ liệu. Nhấn "Tải dữ liệu từ Sheet" để bắt đầu.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
+    <!-- Thêm Google Sheets API -->
+    <script src="https://apis.google.com/js/api.js"></script>
     <script>
         // Đóng tất cả submenu
         function closeAllSubmenus() {
@@ -251,196 +347,643 @@
             closeAllSubmenus();
         });
 
-        // Show home content by default
-        showContent('home');
-
-        let allAirdrops = [];
+        // Khởi tạo biến
         let currentPage = 1;
         const itemsPerPage = 12;
+        let statusFilter = 'all';
+        let sheetData = [];
 
-        async function loadAirdrops() {
+        // Hàm tải dữ liệu từ file data.txt
+        async function loadAirdropsFromFile() {
             try {
-                console.log('Đang tải dữ liệu từ Google Sheets...');
+                console.log('Bắt đầu tải dữ liệu từ data.txt...');
+                // Sử dụng đường dẫn tương đối với repository
+                const response = await fetch('./data.txt');
                 
-                // Thêm CORS proxy
-                const SHEET_ID = '15PsWPAhgBFiBqpnp0fjfJvyJjCcguPQOZiWKQRCyUg';
-                const base = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?`;
-                const query = encodeURIComponent('Select *');
-                const url = `${base}&tq=${query}`;
-                
-                const response = await fetch(url);
-                const text = await response.text();
-                const data = JSON.parse(text.substring(47).slice(0, -2));
-                
-                // Chuyển đổi dữ liệu
-                const headers = data.table.cols.map(col => col.label.toLowerCase());
-                allAirdrops = data.table.rows.map(row => {
-                    const project = {};
-                    headers.forEach((header, index) => {
-                        project[header] = row.c[index] ? row.c[index].v : '';
-                    });
-                    return project;
-                });
-
-                console.log('Dữ liệu đã tải:', allAirdrops);
-                filterAirdrops();
-                
-            } catch (error) {
-                console.error('Lỗi khi tải dữ liệu:', error);
-                document.getElementById('airdrop-list').innerHTML = `
-                    <div class="error-message">
-                        <p>Lỗi khi tải dữ liệu: ${error.message}</p>
-                        <p>Vui lòng thử lại sau</p>
-                        <button class="retro-button" onclick="loadAirdrops()">Thử lại</button>
-                    </div>`;
-            }
-        }
-
-        function filterAirdrops() {
-            const statusFilter = document.getElementById('statusFilter').value;
-            const sortBy = document.getElementById('sortBy').value;
-            const searchText = document.getElementById('searchInput').value.toLowerCase();
-
-            let filtered = [...allAirdrops];
-
-            // Lọc theo trạng thái
-            if (statusFilter !== 'all') {
-                filtered = filtered.filter(p => p.status.toLowerCase() === statusFilter);
-            }
-
-            // Lọc theo tìm kiếm
-            if (searchText) {
-                filtered = filtered.filter(p => 
-                    p.name.toLowerCase().includes(searchText) ||
-                    p.description.toLowerCase().includes(searchText)
-                );
-            }
-
-            // Sắp xếp
-            filtered.sort((a, b) => {
-                if (sortBy === 'value') {
-                    return parseFloat(b.value.replace('$', '')) - parseFloat(a.value.replace('$', ''));
-                } else {
-                    return new Date(b.enddate) - new Date(a.enddate);
+                if (!response.ok) {
+                    // Nếu không tìm thấy file, sử dụng dữ liệu mẫu
+                    console.log('Không thể tải data.txt, sử dụng dữ liệu mẫu...');
+                    window.sampleAirdrops = [
+                        {
+                            "id": 1,
+                            "name": "Layer Zero",
+                            "logo": "https://cryptologos.cc/logos/layerzero-zro-logo.png",
+                            "status": "Active",
+                            "value": "$500",
+                            "enddate": "2024-04-30",
+                            "requirements": "Twitter Discord",
+                            "link": "https://layerzero.network",
+                            "description": "Layer Zero Airdrop for early users"
+                        },
+                        // ... thêm các dự án mẫu khác nếu cần ...
+                    ];
+                    return window.sampleAirdrops;
                 }
-            });
-
-            // Phân trang
-            const totalPages = Math.ceil(filtered.length / itemsPerPage);
-            currentPage = Math.min(currentPage, totalPages);
-            currentPage = Math.max(1, currentPage);
-
-            const start = (currentPage - 1) * itemsPerPage;
-            const paginatedItems = filtered.slice(start, start + itemsPerPage);
-
-            displayAirdrops(paginatedItems);
-            updatePagination(filtered.length);
-        }
-
-        function displayAirdrops(airdrops) {
-            const container = document.getElementById('airdrop-list');
-            container.innerHTML = '';
-
-            if (airdrops.length === 0) {
-                container.innerHTML = '<div class="no-results">Không tìm thấy dự án nào</div>';
-                return;
+                
+                console.log('Đã nhận response, đang đọc dữ liệu...');
+                const text = await response.text();
+                console.log('Dữ liệu thô:', text.substring(0, 100) + '...');
+                
+                try {
+                    const data = JSON.parse(text);
+                    window.sampleAirdrops = data;
+                    console.log('Đã tải thành công', data.length, 'dự án');
+                    return data;
+                } catch (parseError) {
+                    throw new Error(`Lỗi khi parse JSON: ${parseError.message}\nDữ liệu nhận được: ${text.substring(0, 100)}...`);
+                }
+            } catch (error) {
+                console.error('Chi tiết lỗi:', error);
+                alert(`Không thể tải dữ liệu:\n${error.message}\n\nVui lòng kiểm tra Console (F12) để xem chi tiết.`);
+                return [];
             }
+        }
 
-            airdrops.forEach(project => {
-                const card = document.createElement('div');
-                card.className = 'airdrop-card';
-                card.innerHTML = `
-                    <div class="window-header">
-                        <span>${project.name}</span>
-                        <div class="project-status ${project.status.toLowerCase()}">
-                            <i>${project.status === 'Active' ? '▶' : project.status === 'Upcoming' ? '⏳' : '⏹'}</i>
-                            ${project.status}
-                        </div>
-                    </div>
-                    <div class="window-content">
-                        <div class="project-logo">
-                            <img src="${project.logo}" alt="${project.name}" onerror="this.src='default-logo.png'">
-                        </div>
-                        <div class="project-info">
-                            <div class="info-tag">
-                                <i>💰</i>
-                                <span class="project-value">${project.value}</span>
-                            </div>
-                            <div class="info-tag">
-                                <i>📅</i>
-                                <span class="project-date">${project.enddate}</span>
-                            </div>
-                            <div class="info-tag">
-                                <i>📋</i>
-                                <span class="project-requirements">${project.requirements}</span>
-                            </div>
-                        </div>
-                        <div class="project-desc">${project.description}</div>
-                        <a href="${project.link}" target="_blank" class="retro-button">Tham gia</a>
-                    </div>
-                `;
-                container.appendChild(card);
+        // Khởi tạo dữ liệu khi trang web được tải
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadAirdropsFromFile();
+            showContent('home');
+        });
+
+        // Sửa lại hàm showAirdropContent để sử dụng dữ liệu đã tải
+        async function showAirdropContent(status = 'all') {
+            if (!window.sampleAirdrops) {
+                await loadAirdropsFromFile();
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.style.display = 'none';
             });
-        }
-
-        function updatePagination(totalItems) {
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
-            document.getElementById('pageInfo').textContent = 
-                `Trang ${currentPage} / ${totalPages}`;
-        }
-
-        function changePage(delta) {
-            currentPage += delta;
+            
+            document.getElementById('airdrop-content').style.display = 'block';
+            statusFilter = status;
+            
+            // Cập nhật giá trị của dropdown
+            document.getElementById('statusFilter').value = status;
+            
             filterAirdrops();
         }
 
-        // Thêm hàm để hiển thị loading
-        function showLoading() {
-            document.getElementById('airdrop-list').innerHTML = `
-                <div class="loading">
-                    <p>Đang tải dữ liệu...</p>
-                </div>`;
+        // Hàm chuyển trang
+        function changePage(delta) {
+            const status = document.getElementById('statusFilter').value;
+            let filteredProjects = window.sampleAirdrops;
+            if (status !== 'all') {
+                filteredProjects = window.sampleAirdrops.filter(project => 
+                    project.status.toLowerCase() === status.toLowerCase()
+                );
+            }
+            
+            const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+            const newPage = currentPage + delta;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                showAirdropContent(status);
+            }
         }
 
-        // Cập nhật event listener
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Trang đã load xong');
+        // Thêm các hàm mới để quản lý dự án
+        function showAddProjectForm() {
+            document.getElementById('addProjectForm').style.display = 'block';
+        }
+
+        function hideAddProjectForm() {
+            document.getElementById('addProjectForm').style.display = 'none';
+        }
+
+        // Hàm thêm dự án mới
+        async function addNewProject(event) {
+            event.preventDefault();
+            const form = event.target;
             
-            // Thêm event listeners cho các controls
-            document.getElementById('statusFilter').addEventListener('change', filterAirdrops);
-            document.getElementById('sortBy').addEventListener('change', filterAirdrops);
-            document.getElementById('searchInput').addEventListener('input', filterAirdrops);
+            try {
+                const newProject = {
+                    id: window.sampleAirdrops.length + 1,
+                    name: form.name.value,
+                    logo: form.logo.value,
+                    status: form.status.value,
+                    value: form.value.value,
+                    enddate: form.enddate.value,
+                    requirements: form.requirements.value,
+                    link: form.link.value,
+                    description: form.description.value
+                };
+
+                window.sampleAirdrops.push(newProject);
+                hideAddProjectForm();
+                showAirdropContent();
+                
+                // Reset form
+                form.reset();
+                
+                // Hiển thị thông báo thành công
+                alert('Đã thêm dự án thành công!');
+
+            } catch (error) {
+                console.error('Lỗi khi thêm dự án:', error);
+                alert('Không thể thêm dự án: ' + error.message);
+            }
+        }
+
+        // Hàm hiển thị Data View
+        function showDataView() {
+            showContent('home');
+        }
+
+        // Hàm ẩn Data View
+        function hideDataView() {
+            document.getElementById('data-view').style.display = 'none';
+            showContent('home');
+        }
+
+        // Hàm tải dữ liệu từ Google Sheet
+        async function fetchSheetData() {
+            try {
+                const SHEET_ID = '15PeWPAhgBFJBqpnp0Rjf_vyJjCcguPQOZiWKvQRCyUg';
+                const GID = '0';
+                const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+                
+                console.log('Đang tải dữ liệu từ:', SHEET_URL);
+                
+                // Hiển thị trạng thái đang tải
+                const tbody = document.getElementById('sheet-data');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center;">
+                            <div style="padding: 20px;">
+                                Đang tải dữ liệu...
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+
+                const response = await fetch(SHEET_URL, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'text/csv;charset=UTF-8',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const csvText = await response.text();
+                console.log('Dữ liệu nhận được:', csvText.substring(0, 100) + '...');
+                
+                // Chuyển đổi CSV thành mảng
+                const rows = csvText.split('\n').map(row => {
+                    // Xử lý trường hợp có dấu phẩy trong chuỗi được bọc bởi dấu nháy kép
+                    const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                    if (!matches) return [];
+                    return matches.map(val => val.replace(/^"|"$/g, '').trim());
+                });
+                
+                // Bỏ qua hàng đầu tiên (tiêu đề)
+                const dataRows = rows.slice(1);
+                
+                // Chuyển đổi thành mảng đối tượng
+                sheetData = dataRows
+                    .filter(row => row.length >= 9) // Chỉ lấy các dòng có đủ dữ liệu
+                    .map((row, index) => ({
+                        id: row[0] || (index + 1).toString(),
+                        name: row[1] || '',
+                        logo: row[2] || 'https://via.placeholder.com/50',
+                        status: row[3] || 'Unknown',
+                        value: row[4] || '$0',
+                        enddate: row[5] || 'TBA',
+                        requirements: row[6] || 'None',
+                        link: row[7] || '#',
+                        description: row[8] || 'No description'
+                    }))
+                    .filter(item => item.name && item.name.trim() !== '');
+
+                console.log('Số lượng dự án đã tải:', sheetData.length);
+                console.log('Dữ liệu mẫu:', sheetData[0]);
+
+                // Hiển thị dữ liệu trong bảng
+                displaySheetData();
+                
+                if (sheetData.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="9" style="text-align: center;">
+                                Không tìm thấy dữ liệu trong sheet.<br>
+                                <button class="retro-button" onclick="fetchSheetData()">Tải lại</button>
+                            </td>
+                        </tr>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Lỗi khi tải dữ liệu:', error);
+                
+                const tbody = document.getElementById('sheet-data');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="color: red; text-align: center;">
+                            <div style="padding: 20px;">
+                                <strong>Lỗi khi tải dữ liệu</strong><br>
+                                ${error.message}<br><br>
+                                Vui lòng kiểm tra:
+                                <ul style="text-align: left; margin: 10px 0;">
+                                    <li>Google Sheet đã được chia sẻ công khai (Anyone with the link)</li>
+                                    <li>Sheet ID: ${SHEET_ID}</li>
+                                    <li>Sheet GID: ${GID}</li>
+                                    <li>Kết nối internet ổn định</li>
+                                </ul>
+                                <button class="retro-button" onclick="fetchSheetData()">Thử lại</button>
+                                <a href="https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit#gid=${GID}" 
+                                   target="_blank" 
+                                   class="retro-button">
+                                    Mở Google Sheet
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Hàm hiển thị dữ liệu sheet trong bảng
+        function displaySheetData() {
+            if (!sheetData || sheetData.length === 0) return;
             
-            // Hiển thị loading và load dữ liệu
-            showLoading();
-            loadAirdrops();
+            const tbody = document.getElementById('sheet-data');
+            tbody.innerHTML = sheetData.map(row => `
+                <tr>
+                    <td>${row.id}</td>
+                    <td>${row.name}</td>
+                    <td><img src="${row.logo}" alt="${row.name}" style="width: 30px; height: 30px; object-fit: contain;"></td>
+                    <td><span class="status ${row.status.toLowerCase()}">${row.status}</span></td>
+                    <td>${row.value}</td>
+                    <td>${row.enddate}</td>
+                    <td>${row.requirements}</td>
+                    <td><a href="${row.link}" target="_blank" class="retro-button">Xem</a></td>
+                    <td>${row.description}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Hàm sử dụng dữ liệu cho Airdrop
+        function useDataForAirdrop() {
+            if (!sheetData) {
+                alert('Vui lòng tải dữ liệu từ Sheet trước!');
+                return;
+            }
+            
+            window.sampleAirdrops = [...sheetData];
+            alert('Đã cập nhật dữ liệu Airdrop thành công!');
+            hideDataView();
+            showAirdropContent();
+        }
+
+        // Thêm event listener cho nút đóng cửa sổ
+        document.querySelectorAll('.window-close').forEach(button => {
+            button.addEventListener('click', function() {
+                const section = this.closest('.content-section');
+                if (section) {
+                    section.style.display = 'none';
+                    showContent('home');
+                }
+            });
         });
 
-        function showAirdropContent(status = 'all') {
-            console.log('Hiển thị airdrop với trạng thái:', status);
-            
-            // Hiển thị section airdrop
-            const sections = document.getElementsByClassName('content-section');
-            for (let section of sections) {
-                section.style.display = 'none';
+        // Thêm event listener cho bộ lọc
+        document.getElementById('statusFilter')?.addEventListener('change', function(e) {
+            showAirdropContent(e.target.value);
+        });
+
+        document.getElementById('sortBy')?.addEventListener('change', function(e) {
+            const status = document.getElementById('statusFilter').value;
+            showAirdropContent(status);
+        });
+
+        // Thêm style cho nút phân trang
+        const style = document.createElement('style');
+        style.textContent = `
+            .pagination button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
             }
             
-            const airdropContent = document.getElementById('airdrop-content');
-            airdropContent.style.display = 'block';
+            .pagination {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 15px;
+                padding: 20px;
+                background: var(--window-bg);
+                border-top: 2px solid var(--border-dark);
+            }
             
-            // Cập nhật filter
-            document.getElementById('statusFilter').value = status;
-            
-            // Load dữ liệu nếu chưa có
-            if (allAirdrops.length === 0) {
-                loadAirdrops();
+            #pageInfo {
+                font-size: 14px;
+                color: #666;
+                min-width: 150px;
+                text-align: center;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Hàm lọc và hiển thị dự án
+        function filterAirdrops() {
+            if (!window.sampleAirdrops) return;
+
+            let filteredProjects = window.sampleAirdrops;
+            const status = document.getElementById('statusFilter').value;
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            const sortBy = document.getElementById('sortBy').value;
+
+            // Lọc theo trạng thái
+            if (status !== 'all') {
+                filteredProjects = filteredProjects.filter(project => 
+                    project.status.toLowerCase() === status.toLowerCase()
+                );
+            }
+
+            // Lọc theo từ khóa tìm kiếm
+            if (searchText) {
+                filteredProjects = filteredProjects.filter(project =>
+                    project.name.toLowerCase().includes(searchText) ||
+                    project.description.toLowerCase().includes(searchText)
+                );
+            }
+
+            // Sắp xếp dự án
+            if (sortBy === 'value') {
+                filteredProjects.sort((a, b) => 
+                    parseFloat(b.value.replace('$', '')) - parseFloat(a.value.replace('$', ''))
+                );
+            } else if (sortBy === 'date') {
+                filteredProjects.sort((a, b) => 
+                    new Date(b.enddate) - new Date(a.enddate)
+                );
+            }
+
+            // Phân trang
+            const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentProjects = filteredProjects.slice(startIndex, endIndex);
+
+            // Cập nhật thông tin trang
+            const pageInfo = document.getElementById('pageInfo');
+            pageInfo.textContent = `Trang ${currentPage}/${totalPages || 1} (${filteredProjects.length} dự án)`;
+
+            // Cập nhật trạng thái nút phân trang
+            const prevButton = document.querySelector('.pagination button:first-child');
+            const nextButton = document.querySelector('.pagination button:last-child');
+            prevButton.disabled = currentPage === 1;
+            nextButton.disabled = currentPage === totalPages || totalPages === 0;
+
+            // Hiển thị dự án
+            const container = document.getElementById('airdrop-list');
+            if (currentProjects.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 20px; grid-column: 1 / -1;">
+                        <p>Không có dự án nào ${status !== 'all' ? 'ở trạng thái ' + status : ''}</p>
+                    </div>
+                `;
             } else {
-                filterAirdrops();
+                container.innerHTML = currentProjects.map(project => `
+                    <div class="project-card">
+                        <div class="project-header">
+                            <img src="${project.logo}" alt="${project.name}" class="project-logo" 
+                                 onerror="this.src='https://via.placeholder.com/50'">
+                            <div class="project-info">
+                                <h3>${project.name}</h3>
+                                <span class="status ${project.status.toLowerCase()}">${project.status}</span>
+                            </div>
+                        </div>
+                        <div class="project-details">
+                            <div class="detail-row">
+                                <span>Giá trị:</span>
+                                <strong>${project.value}</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Kết thúc:</span>
+                                <strong>${project.enddate}</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Yêu cầu:</span>
+                                <strong>${project.requirements}</strong>
+                            </div>
+                        </div>
+                        <div class="project-description">
+                            <p>${project.description}</p>
+                        </div>
+                        <div class="project-actions">
+                            <a href="${project.link}" target="_blank" class="retro-button">Chi tiết</a>
+                        </div>
+                    </div>
+                `).join('');
             }
-            
-            // Đóng submenu
-            closeAllSubmenus();
         }
+
+        // Thêm event listener cho ô tìm kiếm
+        document.getElementById('searchInput')?.addEventListener('input', function() {
+            currentPage = 1;
+            filterAirdrops();
+        });
     </script>
+
+    <style>
+    /* CSS cho window content */
+    .window-content {
+        padding: 10px;
+        background: var(--window-bg);
+        height: calc(100vh - 150px);
+        overflow-y: auto;
+    }
+
+    /* CSS cho grid layout */
+    .airdrop-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 10px;
+    }
+
+    /* CSS cho project card */
+    .project-card {
+        background: white;
+        border: 2px solid var(--border-dark);
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 3px 3px 0 var(--border-dark);
+    }
+
+    .data-view-btn {
+        position: absolute;
+        right: 10px;
+        top: 5px;
+        font-size: 12px;
+        padding: 2px 8px;
+    }
+
+    .data-toolbar {
+        margin-bottom: 10px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .retro-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 2px solid var(--border-dark);
+        background: white;
+    }
+
+    .retro-table th, .retro-table td {
+        border: 1px solid var(--border-light);
+        padding: 5px;
+        text-align: left;
+    }
+
+    .retro-table th {
+        background: var(--window-header);
+        color: white;
+    }
+
+    .retro-table tr:nth-child(even) {
+        background: #f0f0f0;
+    }
+
+    /* CSS cho phần loading */
+    .loading-message {
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 10px auto;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* CSS cho project card */
+    .project-card {
+        background: white;
+        border: 2px solid var(--border-dark);
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 3px 3px 0 var(--border-dark);
+    }
+
+    .project-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .project-logo {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+        border: 1px solid var(--border-light);
+        border-radius: 8px;
+        padding: 5px;
+    }
+
+    .project-info h3 {
+        margin: 0 0 5px 0;
+        font-size: 16px;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .status.active {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .status.upcoming {
+        background: #2196F3;
+        color: white;
+    }
+
+    .status.ended {
+        background: #9E9E9E;
+        color: white;
+    }
+
+    .project-details {
+        margin-bottom: 15px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    .project-description {
+        font-size: 14px;
+        margin-bottom: 15px;
+        color: #666;
+    }
+
+    .project-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    /* CSS cho toolbar */
+    .airdrop-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background: var(--window-bg);
+        border-bottom: 2px solid var(--border-dark);
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .search-group {
+        flex: 1;
+        max-width: 300px;
+        margin-left: 10px;
+    }
+
+    /* CSS cho pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        padding: 20px;
+    }
+
+    #pageInfo {
+        font-size: 14px;
+        color: #666;
+    }
+    </style>
 </body>
 </html> 
